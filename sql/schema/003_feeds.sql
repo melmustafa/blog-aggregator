@@ -1,0 +1,17 @@
+-- +goose Up
+CREATE TABLE feeds (
+	id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+	name TEXT NOT NULL,
+	url TEXT UNIQUE NOT NULL,
+	user_id UUID NOT NULL,
+	created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+	updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+	CONSTRAINT fk_user
+	FOREIGN KEY (user_id)
+	REFERENCES users(id)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE
+);
+
+-- +goose Down
+DROP TABLE feeds;
