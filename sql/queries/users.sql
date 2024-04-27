@@ -4,10 +4,7 @@ VALUES ($1, NOW(), NOW(), $2, encode(sha256(random()::text::bytea), 'hex'))
 RETURNING *;
 
 -- name: GetUserByApiKey :one
-select *
-from users
-where api_key = $1
-limit 1
-;
-
-
+SELECT *
+FROM users
+WHERE api_key = $1
+LIMIT 1;

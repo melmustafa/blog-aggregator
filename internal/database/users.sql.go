@@ -36,10 +36,10 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUserByApiKey = `-- name: GetUserByApiKey :one
-select id, name, created_at, updated_at, api_key
-from users
-where api_key = $1
-limit 1
+SELECT id, name, created_at, updated_at, api_key
+FROM users
+WHERE api_key = $1
+LIMIT 1
 `
 
 func (q *Queries) GetUserByApiKey(ctx context.Context, apiKey string) (User, error) {
