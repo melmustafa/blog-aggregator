@@ -11,7 +11,7 @@ import (
 	"github.com/melmustafa/blog-aggregator/internal/database"
 )
 
-type feedResponsePayload struct {
+type Feed struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -30,16 +30,9 @@ func (cfg *apiConfig) getFeeds(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	feeds := []feedResponsePayload{}
+	feeds := []Feed{}
 	for _, feed := range retrievedFeeds {
-		feeds = append(feeds, feedResponsePayload{
-			ID:        feed.ID,
-			CreatedAt: feed.CreatedAt,
-			UpdatedAt: feed.UpdatedAt,
-			Name:      feed.Name,
-			Url:       feed.Url,
-			UserId:    feed.UserID,
-		})
+		feeds = append(feeds, databaseFeedToJson(feed))
 	}
 	respondWithJSON(w, http.StatusOK, feeds)
 }
@@ -78,24 +71,22 @@ func (cfg *apiConfig) createFeed(w http.ResponseWriter, r *http.Request, user da
 	}
 
 	type responsePayload struct {
-		Feed       feedResponsePayload       `json:"feed"`
-		FeedFollow feedFollowResponsePayload `json:"feed_follow"`
+		Feed       Feed       `json:"feed"`
+		FeedFollow FeedFollow `json:"feed_follow"`
 	}
 	respondWithJSON(w, http.StatusCreated, responsePayload{
-		Feed: feedResponsePayload{
-			ID:        createdFeed.ID,
-			CreatedAt: createdFeed.CreatedAt,
-			UpdatedAt: createdFeed.UpdatedAt,
-			Name:      createdFeed.Name,
-			Url:       createdFeed.Url,
-			UserId:    createdFeed.UserID,
-		},
-		FeedFollow: feedFollowResponsePayload{
-			ID:        createdFeedFollow.ID,
-			CreatedAt: createdFeedFollow.CreatedAt,
-			UpdatedAt: createdFeedFollow.UpdatedAt,
-			UserId:    createdFeedFollow.UserID,
-			FeedId:    createdFeedFollow.FeedID,
-		},
+		Feed:       databaseFeedToJson(createdFeed),
+		FeedFollow: databaseFeedFollowToJson(createdFeedFollow),
 	})
+}
+
+func databaseFeedToJson(feed database.Feed) Feed {
+	return Feed{
+		ID:        feed.ID,
+		CreatedAt: feed.CreatedAt,
+		UpdatedAt: feed.UpdatedAt,
+		Name:      feed.Name,
+		Url:       feed.Url,
+		UserId:    feed.UserID,
+	}
 }

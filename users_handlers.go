@@ -11,7 +11,7 @@ import (
 	"github.com/melmustafa/blog-aggregator/internal/database"
 )
 
-type userResponsePayload struct {
+type User struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -20,7 +20,7 @@ type userResponsePayload struct {
 }
 
 func (cfg *apiConfig) getUser(w http.ResponseWriter, r *http.Request, user database.User) {
-	respondWithJSON(w, http.StatusOK, userResponsePayload{
+	respondWithJSON(w, http.StatusOK, User{
 		ID:        user.ID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
@@ -54,11 +54,15 @@ func (cfg *apiConfig) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, userResponsePayload{
-		ID:        createdUser.ID,
-		CreatedAt: createdUser.CreatedAt,
-		UpdatedAt: createdUser.UpdatedAt,
-		Name:      createdUser.Name,
-		ApiKey:    createdUser.ApiKey,
-	})
+	respondWithJSON(w, http.StatusCreated, databaseUserToJson(createdUser))
+}
+
+func databaseUserToJson(user database.User) User {
+	return User{
+		ID:        user.ID,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+		Name:      user.Name,
+		ApiKey:    user.ApiKey,
+	}
 }

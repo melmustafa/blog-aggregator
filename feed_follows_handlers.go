@@ -11,7 +11,7 @@ import (
 	"github.com/melmustafa/blog-aggregator/internal/database"
 )
 
-type feedFollowResponsePayload struct {
+type FeedFollow struct {
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -29,15 +29,9 @@ func (cfg *apiConfig) getFeedFollows(w http.ResponseWriter, _ *http.Request, use
 		return
 	}
 
-	feedFollows := []feedFollowResponsePayload{}
+	feedFollows := []FeedFollow{}
 	for _, feedFollow := range retrievedFeedFollows {
-		feedFollows = append(feedFollows, feedFollowResponsePayload{
-			ID:        feedFollow.ID,
-			CreatedAt: feedFollow.CreatedAt,
-			UpdatedAt: feedFollow.UpdatedAt,
-			UserId:    feedFollow.UserID,
-			FeedId:    feedFollow.FeedID,
-		})
+		feedFollows = append(feedFollows, databaseFeedFollowToJson(feedFollow))
 	}
 	respondWithJSON(w, http.StatusOK, feedFollows)
 }
@@ -68,13 +62,7 @@ func (cfg *apiConfig) createFeedFollow(w http.ResponseWriter, r *http.Request, u
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, feedFollowResponsePayload{
-		ID:        createdFeedFollow.ID,
-		CreatedAt: createdFeedFollow.CreatedAt,
-		UpdatedAt: createdFeedFollow.UpdatedAt,
-		UserId:    createdFeedFollow.UserID,
-		FeedId:    createdFeedFollow.FeedID,
-	})
+	respondWithJSON(w, http.StatusCreated, databaseFeedFollowToJson(createdFeedFollow))
 }
 
 func (cfg *apiConfig) deleteFeedFollows(w http.ResponseWriter, r *http.Request, _ database.User) {
@@ -94,4 +82,14 @@ func (cfg *apiConfig) deleteFeedFollows(w http.ResponseWriter, r *http.Request, 
 	}
 
 	respondWithJSON(w, http.StatusOK, struct{}{})
+}
+
+func databaseFeedFollowToJson(feedFollow database.FeedFollow) FeedFollow {
+	return FeedFollow{
+		ID:        feedFollow.ID,
+		CreatedAt: feedFollow.CreatedAt,
+		UpdatedAt: feedFollow.UpdatedAt,
+		UserId:    feedFollow.UserID,
+		FeedId:    feedFollow.FeedID,
+	}
 }
