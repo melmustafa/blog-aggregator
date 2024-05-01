@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -32,6 +33,7 @@ func main() {
 		DB: dbQueries,
 	}
 
+	go apiCfg.FetchService(10, time.Second*10)
 	port := os.Getenv("PORT")
 
 	mux := http.NewServeMux()

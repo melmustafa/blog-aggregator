@@ -12,17 +12,18 @@ import (
 )
 
 type Feed struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Name      string    `json:"name"`
-	Url       string    `json:"url"`
-	UserId    uuid.UUID `json:"user_id"`
+	ID            uuid.UUID  `json:"id"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
+	Name          string     `json:"name"`
+	Url           string     `json:"url"`
+	UserId        uuid.UUID  `json:"user_id"`
+	LastFetchedAt *time.Time `json:"last_fetched_at"`
 }
 
 func (cfg *apiConfig) getFeeds(w http.ResponseWriter, _ *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	retrievedFeeds, err := cfg.DB.GetFeeds(ctx)
+	retrievedFeeds, err := cfg.DB.GetNextFeedsToFetch(ctx, 20)
 	cancel()
 	if err != nil {
 		log.Printf("coudn't get the feeds with error %s\n", err)
@@ -81,12 +82,17 @@ func (cfg *apiConfig) createFeed(w http.ResponseWriter, r *http.Request, user da
 }
 
 func databaseFeedToJson(feed database.Feed) Feed {
+	var timeValue *time.Time
+	if feed.LastFetchedAt.Valid {
+		timeValue = &feed.LastFetchedAt.Time
+	}
 	return Feed{
-		ID:        feed.ID,
-		CreatedAt: feed.CreatedAt,
-		UpdatedAt: feed.UpdatedAt,
-		Name:      feed.Name,
-		Url:       feed.Url,
-		UserId:    feed.UserID,
+		ID:            feed.ID,
+		CreatedAt:     feed.CreatedAt,
+		UpdatedAt:     feed.UpdatedAt,
+		Name:          feed.Name,
+		Url:           feed.Url,
+		UserId:        feed.UserID,
+		LastFetchedAt: timeValue,
 	}
 }
